@@ -3,51 +3,24 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 @app.route('/data', methods=['POST'])
-def receive_data():
+def receive_any_data():
     try:
-        headers = dict(request.headers)
-        content_type = request.content_type or ""
+        print("🔔 POST request received!")
 
-        if 'application/json' in content_type:
-            data = request.get_json(silent=True)
-            if not data:
-                return jsonify({"error": "No JSON data received"}), 400
+        # Log everything for debugging
+        print(f"Headers: {dict(request.headers)}")
+        print(f"Raw Body: {request.data.decode('utf-8', errors='ignore')}")
 
-            device_id = data.get("deviceId", "Unknown")
-            logs = data.get("logs", "")
-            timestamp = data.get("timestamp", "N/A")
-            log_type = data.get("type", "Unknown")
-
-            print(f"Received logs from device {device_id}")
-            print(f"Type: {log_type}")
-            print(f"Timestamp: {timestamp}")
-            print(f"Logs (base64): {logs}")
-        else:
-            raw_data = request.data.decode('utf-8', errors='ignore')
-            print(f"Received RAW data: {raw_data}")
-
-            device_id = "Unknown"
-            logs = raw_data
-            timestamp = "N/A"
-            log_type = "Unknown"
-
-        print(f"Headers: {headers}")
-
-        response = {
-            "message": "Log data received successfully",
-            "device_id": device_id,
-            "status": "OK",
-            "log_type": log_type,
-            "timestamp": timestamp,
-            "received_headers": headers,
-            "logs": logs if 'application/json' in content_type else None,
-            "raw_data": logs if 'application/json' not in content_type else None
-        }
-
-        return jsonify(response), 200
+        return jsonify({
+            "message": "POST request received",
+            "status": "OK"
+        }), 200
     except Exception as e:
+        print(f"❌ Error: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    from gunicorn.app.wsgiapp import run
-    run()
+# Make sure it works on Render
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
