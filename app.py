@@ -2,19 +2,32 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-@app.route('/data', methods=['POST'])
+@app.route('/data', methods=['GET', 'POST'])
 def receive_any_data():
     try:
-        print("🔔 POST request received!")
+        if request.method == 'POST':
+            print("🔔 POST request received!")
 
-        # Log everything for debugging
-        print(f"Headers: {dict(request.headers)}")
-        print(f"Raw Body: {request.data.decode('utf-8', errors='ignore')}")
+            # Log everything for debugging
+            print(f"Headers: {dict(request.headers)}")
+            print(f"Raw Body: {request.data.decode('utf-8', errors='ignore')}")
 
-        return jsonify({
-            "message": "POST request received",
-            "status": "OK"
-        }), 200
+            return jsonify({
+                "message": "POST request received",
+                "status": "OK"
+            }), 200
+
+        elif request.method == 'GET':
+            print("🔔 GET request received!")
+
+            # Log headers for debugging
+            print(f"Headers: {dict(request.headers)}")
+
+            return jsonify({
+                "message": "GET request received",
+                "status": "OK"
+            }), 200
+
     except Exception as e:
         print(f"❌ Error: {str(e)}")
         return jsonify({"error": str(e)}), 500
